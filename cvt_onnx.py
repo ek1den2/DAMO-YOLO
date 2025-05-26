@@ -18,7 +18,7 @@ device = args.mode
 # モデルの準備
 config = parse_config("configs/damoyolo_tinynasL20_T.py")
 model = build_local_model(config, device)
-ckpt = torch.load("weights/damoyolo_tinynasL20_T.pth", map_location=device)
+ckpt = torch.load("checkpoints/damoyolo_tinynasL20_T.pth", map_location=device)
 model.load_state_dict(ckpt['model'], strict=True)
 model = replace_module(model, nn.SiLU, SiLU)
 model.head.nms = False
@@ -33,7 +33,7 @@ dummy_input = torch.randn(1, 3, 640, 640).to(device)
 torch.onnx.export(
     model,
     dummy_input,
-    "./weights/damo_yolo_T.onnx",
+    "./checkpoints/damo_yolo_T.onnx",
     input_names=["input"],
     output_names=["output_1", "output_2"],
     opset_version=17

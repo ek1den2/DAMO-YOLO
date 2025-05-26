@@ -9,6 +9,7 @@ from damo.utils import vis
 import copy
 
 import argparse
+from collections import deque
 
 # オプションの確認
 parser = argparse.ArgumentParser(description='DAMO-YOLOのwebカメラ推論')
@@ -20,7 +21,7 @@ device = args.mode
 # モデルの準備
 config = parse_config("configs/damoyolo_tinynasL20_T.py")
 model = build_local_model(config, device)
-ckpt = torch.load("weights/damoyolo_tinynasL20_T.pth", map_location=device)
+ckpt = torch.load("checkpoints/damoyolo_tinynasL20_T.pth", map_location=device)
 model.load_state_dict(ckpt['model'], strict=True)
 for layer in model.modules():
     if isinstance(layer, RepConv):
@@ -38,8 +39,9 @@ def  postprocess(preds):
     return bboxes, scores, cls_inds
 
 cap = cv2.VideoCapture(0)
-conf = 0.5
+conf = 0.6
 
+frame_times = deque(maxlen=60)
 # メイン動作部分
 while True:   
     with torch.no_grad():
@@ -58,7 +60,16 @@ while True:
         # print("indx:", cls_inds)
         vis_img = vis(original_img, bboxes, scores, cls_inds, conf, config.dataset.class_names)
         end = time()
-        cv2.putText(vis_img, f"time:{(end-start)*1000:4.3f}ms", (0, 20),
+        frame_times.append(end - start)
+        if len(frame_times) > 0:
+            avg = sum(frame_times) / len(frame_times)
+            fps = 1.0 / avg
+        else:
+            fps = 0.0
+
+        cv2.putText(vis_img, f"FPS:{fps:3.2f}", (0, 20),
                     cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 255, 0), 2, cv2.LINE_4)
+        # cv2.putText(vis_img, f"time:{(end-start)*1000:4.3f}ms", (0, 20),
+        #             cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 255, 0), 2, cv2.LINE_4)
         cv2.imshow("show", vis_img)
         cv2.waitKey(1)
