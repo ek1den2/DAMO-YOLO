@@ -1,4 +1,4 @@
-timm
+timm==0.6.13
 omegaconf
 numpy
 opencv_python
@@ -9,3 +9,5 @@ Pillow
 thop
 tabulate
 easydict
+cython
+git+https://github.com/cocodataset/cocoapi.git#subdirectory=PythonAPI
