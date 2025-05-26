@@ -9,12 +9,22 @@ from damo.utils import vis
 import copy
 import onnxruntime
 
-# ONNXでGPUを使用
-prov = ['CUDAExecutionProvider']
+import argparse
+
+# オプションの確認
+parser = argparse.ArgumentParser(description='DAMO-YOLOのwebカメラ推論')
+parser.add_argument('--mode', type=str, default='cuda')
+args = parser.parse_args()
+
 
 # モデルの読み込み
-model = onnxruntime.InferenceSession("./weights/damo_yolo_T.onnx", providers=prov)
+# ONNXでGPUorCPU
+if args.mode == 'cuda':
+    prov = ['CUDAExecutionProvider']
+elif args.mode == 'cpu':
+    prov = ['CPUExecutionProvider']
 
+model = onnxruntime.InferenceSession("./weights/damo_yolo_T.onnx", providers=prov)
 cap = cv2.VideoCapture(0)
 conf = 0.5
 config = parse_config("./configs/damoyolo_tinynasL20_T.py")

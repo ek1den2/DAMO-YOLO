@@ -8,10 +8,19 @@ import numpy as np
 from damo.utils import vis
 import copy
 
+import argparse
+
+# オプションの確認
+parser = argparse.ArgumentParser(description='DAMO-YOLOのwebカメラ推論')
+parser.add_argument('--mode', type=str, default='cuda')
+args = parser.parse_args()
+
+device = args.mode
+
 # モデルの準備
 config = parse_config("configs/damoyolo_tinynasL20_T.py")
-model = build_local_model(config, "cuda")
-ckpt = torch.load("weights/damoyolo_tinynasL20_T.pth", map_location="cuda")
+model = build_local_model(config, device)
+ckpt = torch.load("weights/damoyolo_tinynasL20_T.pth", map_location=device)
 model.load_state_dict(ckpt['model'], strict=True)
 for layer in model.modules():
     if isinstance(layer, RepConv):
@@ -40,13 +49,13 @@ while True:
         original_img = copy.deepcopy(image)
         frame_in = image.transpose(2, 0, 1)[np.newaxis] # [640, 640, 3] -> [1, 3, 640, 640]
         # print(frame_in.shape)
-        frame_in = torch.from_numpy(frame_in).to(torch.float32).to('cuda')
+        frame_in = torch.from_numpy(frame_in).to(torch.float32).to(device)
         start = time()
         preds = model(frame_in)
         bboxes, scores, cls_inds = postprocess(preds)
-        print("bbox:", bboxes)
-        print("scores:", scores)
-        print("indx:", cls_inds)
+        # print("bbox:", bboxes)
+        # print("scores:", scores)
+        # print("indx:", cls_inds)
         vis_img = vis(original_img, bboxes, scores, cls_inds, conf, config.dataset.class_names)
         end = time()
         cv2.putText(vis_img, f"time:{(end-start)*1000:4.3f}ms", (0, 20),
