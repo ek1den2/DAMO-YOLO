@@ -131,7 +131,7 @@ while True:
         fps = 1.0 / avg
     else:
         fps = 0.0
-    cv2.putText(vis_img, f"FPS:{fps:2.2f}", (0, 20),
+    cv2.putText(vis_img, f"FPS:{fps:3.2f}", (0, 20),
                 cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 255, 0), 2, cv2.LINE_4)
     # cv2.putText(vis_img, f"time:{(end-start)*1000:4.3f}ms", (0, 20),
     #                 cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 255, 0), 2, cv2.LINE_4)
