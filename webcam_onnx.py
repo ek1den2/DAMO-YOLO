@@ -114,12 +114,16 @@ while True:
     bboxes, scores = preds[1][0], preds[0][0]
     cls_inds, scores = np.argmax(scores, axis=1), np.max(scores, axis=1)
 
-    mask = (cls_inds == person_cls_id) & (scores > conf)
-    
     # 人間だけ
-    bboxes = bboxes[mask]
-    scores = scores[mask]
-    cls_inds = cls_inds[mask]
+    # mask = (cls_inds == person_cls_id) & (scores > conf)
+    # bboxes = bboxes[mask]
+    # scores = scores[mask]
+    # cls_inds = cls_inds[mask]
+
+    # All Class
+    bboxes = bboxes[scores > conf]
+    cls_inds = cls_inds[scores > conf]
+    scores = scores[scores > conf]
 
 
     bboxes, scores, cls_inds = nms_fast(bboxes, scores, cls_inds)
